@@ -19,3 +19,8 @@ The Secure MFA Healthcare Access Portal is a Python web application designed to 
 - pytest
 - hypothesis
 - Docker
+
+## How to run 
+make install
+make test
+make run
