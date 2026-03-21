@@ -1,0 +1,48 @@
+# Python cache / compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Pytest
+.pytest_cache/
+
+# Mypy
+.mypy_cache/
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# VS Code / Codespaces
+.vscode/
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node / npm
+node_modules/
+npm-debug.log*
+
+# Generated UML exports
+*.png
+!Docs/Uml/*.png
+!Docs/Uml/dist_puml/*.png
+*.svg
+*.pdf
+
+# Environment variables / secrets
+.env
+.env.*
