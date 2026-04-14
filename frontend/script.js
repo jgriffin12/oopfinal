@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://cj-secure-webs.onrender.com/";
 
 const outputEl = document.getElementById("output");
 const authStatusEl = document.getElementById("auth-status");
