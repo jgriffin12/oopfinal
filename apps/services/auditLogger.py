@@ -10,7 +10,13 @@ class AuditLogger:
     This supports accountability by storing a trace of authentication
     activity, access attempts, and other sensitive operations.
     """
+    _instance = None 
 
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(AuditLogger, cls).__new__(cls)
+        return cls._instance
+        
     def __init__(self) -> None:
         self.audit_repository = AuditRepository()
         self.next_event_id = 1
