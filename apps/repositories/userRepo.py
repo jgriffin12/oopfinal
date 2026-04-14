@@ -15,7 +15,7 @@ class UserRepository:
                 user_id=1,
                 username="alice",
                 password_hash=hasher.hash_password("password123"),
-                email="alice@example.com",
+                email="lia03gomes@gmail.com",
                 role="admin",
             )
         }

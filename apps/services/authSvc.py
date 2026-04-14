@@ -7,13 +7,6 @@ from apps.services.auditLogger import AuditLogger
 class AuthService:
     """
     Service responsible for authentication and MFA workflow.
-
-    This class handles:
-    1. Looking up users
-    2. Verifying passwords
-    3. Starting MFA
-    4. Verifying MFA
-    5. Logging important security events
     """
 
     def __init__(self) -> None:
@@ -25,9 +18,7 @@ class AuthService:
     def authenticate(self, username: str, password: str) -> dict:
         """
         First step of login.
-
-        If the username and password are valid, send an MFA challenge and
-        return a pending response.
+        Validate username and password, then send an MFA challenge.
         """
         user = self.user_repository.find_by_username(username)
 
@@ -35,31 +26,31 @@ class AuthService:
             self.audit_logger.log_event("login_failed", username, "failure")
             return {"status": "failure", "message": "Invalid credentials"}
 
-        password_matches = (
-            password == "password123"
-            or self.password_hasher.verify_password(password, user.password_hash)
-        )
+        password_matches = self.password_hasher.verify_password(password, user.password_hash)
 
         if not password_matches:
             self.audit_logger.log_event("login_failed", username, "failure")
             return {"status": "failure", "message": "Invalid credentials"}
 
-        strategy = self.mfa_factory.create_strategy("email")
-        strategy.send_code(user)
+        try:
+            strategy = self.mfa_factory.create_strategy("email")
+            strategy.send_code(user)
+        except Exception as exc:
+            self.audit_logger.log_event("mfa_send_failed", username, "failure")
+            return {"status": "failure", "message": f"Failed to send MFA code: {exc}"}
 
         self.audit_logger.log_event("mfa_challenge_sent", username, "success")
 
         return {
             "status": "pending",
-            "message": "MFA challenge sent",
+            "message": "MFA challenge sent to your email",
             "username": username,
         }
 
     def verify_mfa(self, username: str, code: str) -> dict:
         """
         Second step of login.
-
-        If the submitted MFA code is correct, return a successful login result.
+        Verify the submitted MFA code.
         """
         user = self.user_repository.find_by_username(username)
 
@@ -68,6 +59,7 @@ class AuthService:
             return {"status": "failure", "message": "User not found"}
 
         strategy = self.mfa_factory.create_strategy("email")
+
         if not strategy.verify_code(user, code):
             self.audit_logger.log_event("mfa_failed", username, "failure")
             return {"status": "failure", "message": "Invalid MFA code"}

@@ -4,21 +4,16 @@ from apps.security.mfaStrategies import EmailOTPStrategy, TOTPStrategy, MFAStrat
 class MFAFactory:
     """
     Factory responsible for creating the correct MFA strategy object.
-
-    This is the Factory Method pattern.
-    The rest of the application does not need to know the exact class name
-    ahead of time. It only asks for the strategy type it wants.
     """
 
+    _email_strategy = EmailOTPStrategy()
+    _totp_strategy = TOTPStrategy()
+
     def create_strategy(self, method: str) -> MFAStrategy:
-        """
-        Return the correct MFA strategy implementation based on the method name.
-        """
         if method == "email":
-            return EmailOTPStrategy()
+            return self._email_strategy
 
         if method == "totp":
-            return TOTPStrategy()
+            return self._totp_strategy
 
-        # Raise an error for unsupported methods so bugs fail clearly.
         raise ValueError(f"Unsupported MFA method: {method}")
