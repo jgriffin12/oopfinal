@@ -5,21 +5,36 @@ from apps.repositories.auditRepo import AuditRepository
 
 class AuditLogger:
     """
-    Service responsible for recording security-related actions.
+    Singleton service responsible for recording security-related actions.
 
-    This supports accountability by storing a trace of authentication
-    activity, access attempts, and other sensitive operations.
+    This ensures the application uses one shared audit logger so audit
+    events are collected in a single place across the system.
     """
-    _instance = None 
+
+    _instance = None
+    _initialized = False
 
     def __new__(cls):
+        """
+        Ensure only one AuditLogger instance is ever created.
+        """
         if cls._instance is None:
             cls._instance = super(AuditLogger, cls).__new__(cls)
         return cls._instance
-        
+
     def __init__(self) -> None:
+        """
+        Initialize the singleton only once.
+
+        Without this guard, every call to AuditLogger() would reset the
+        repository and event counter.
+        """
+        if self.__class__._initialized:
+            return
+
         self.audit_repository = AuditRepository()
         self.next_event_id = 1
+        self.__class__._initialized = True
 
     def log_event(self, event_type: str, username: str, status: str) -> SecurityEvent:
         """
