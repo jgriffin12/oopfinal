@@ -28,6 +28,10 @@ def create_app() -> Flask:
     app.register_blueprint(record_bp)
     app.register_blueprint(admin_bp)
 
+    @app.route("/")
+    def home(): 
+        return "Secure Access Portal backend is running."
+        
     return app
 
 

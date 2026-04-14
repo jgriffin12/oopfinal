@@ -24,4 +24,19 @@
     curl -X POST http://127.0.0.1:5000/verify-mfa -H "Content-Type: application/json" -d '{"username":"alice","code":"123456"}'
 
 
+Using Render
+
+1. Create virtual environment (venv).
+
+    source venv/bin/activate
+
+2. Install Dependencies (Should only have to do once.)
+
+    pip install -r requirements.txt
+
+3. Run application. 
+
+    python3 -m gunicorn apps.main:app
+
+
 

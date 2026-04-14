@@ -4,7 +4,7 @@ flask
 # Accepts requests from different origins
 flask-cors
 
-#
+# Needed for Render 
 gunicorn
 
 # Unit testing framework
