@@ -181,4 +181,4 @@ export MFA_METHOD=totp
 python -m apps.main 
 
 tools we used for images and format : 
-PicsArt background Remover , Chat GPT Image creator
+PicsArt background Remover , Chat GPT Image creator, https://dribbble.com/shots/15160568-Dashboard-Login-screen inspo

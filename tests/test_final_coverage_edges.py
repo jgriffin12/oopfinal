@@ -288,3 +288,39 @@ def test_check_email_route_error(monkeypatch):
 
     assert response.status_code == 400
     assert response.get_json()["status"] == "error"
+
+
+def test_user_repository_next_user_id_empty_list(tmp_path, monkeypatch):
+    """_next_user_id should return 1 when no users exist."""
+    monkeypatch.chdir(tmp_path)
+
+    repository = UserRepository()
+
+    assert repository._next_user_id([]) == 1
+
+
+def test_user_repository_duplicate_email_create_user(tmp_path, monkeypatch):
+    """Creating an existing email should raise ValueError."""
+    monkeypatch.chdir(tmp_path)
+
+    repository = UserRepository()
+
+    with pytest.raises(ValueError):
+        repository.create_user(
+            username="newalice",
+            password="password123",
+            role="patient",
+            email="demo@example.com",
+        )
+
+
+def test_user_repository_all_users(tmp_path, monkeypatch):
+    """all_users should return every stored user model."""
+    monkeypatch.chdir(tmp_path)
+
+    repository = UserRepository()
+    users = repository.all_users()
+
+    assert len(users) >= 2
+    assert users[0].username == "alice"
+    assert users[0].user_id == 1

@@ -1,7 +1,8 @@
-"""User repository for storing and retrieving portal users."""
+"""Repository for storing and loading user profiles."""
 
 import json
 from pathlib import Path
+from typing import Any
 
 from apps.models.user import User
 from apps.security.passHash import PasswordHasher
@@ -9,80 +10,105 @@ from apps.security.passHash import PasswordHasher
 
 class UserRepository:
     """
-    Repository responsible for user data access.
+    Repository for user profiles.
 
-    For this class project, users are stored in a local JSON file.
-    In a real healthcare system, this would be replaced with a secure database.
+    Users are stored in a JSON text file so registered providers and patients
+    persist after the app restarts.
     """
 
-    def __init__(self) -> None:
-        """Load users from local storage or create a default demo user."""
+    def __init__(self, file_path: str = "data/users.json") -> None:
+        """Create the repository and ensure the storage file exists."""
+        self.file_path = Path(file_path)
         self.password_hasher = PasswordHasher()
-        self.data_path = Path("data/users.json")
-        self.data_path.parent.mkdir(parents=True, exist_ok=True)
-        self.users = self._load_users()
+        self.file_path.parent.mkdir(parents=True, exist_ok=True)
+        self._ensure_seed_users()
 
-        if not self.users:
-            self.users = {
-                "alice": User(
-                    user_id=1,
-                    username="alice",
-                    password_hash=self.password_hasher.hash_password("password123"),
-                    email="demo@example.com",
-                    role="admin",
-                )}
-            self._save_users()
-
-    def _load_users(self) -> dict[str, User]:
+    def _ensure_seed_users(self) -> None:
         """
-        Load users from the local JSON file.
+        Create the user file with demo users if it does not exist.
 
-        If the file does not exist, return an empty dictionary.
+        This keeps the original demo accounts working while also supporting
+        newly registered users.
         """
-        if not self.data_path.exists():
-            return {}
+        if self.file_path.exists():
+            return
 
-        with self.data_path.open("r", encoding="utf-8") as file:
-            raw_users = json.load(file)
+        seed_users = [
+            {
+                "user_id": 1,
+                "username": "alice",
+                "email": "demo@example.com",
+                "role": "provider",
+                "password_hash": self.password_hasher.hash_password(
+                    "password123"
+                ),
+            },
+            {
+                "user_id": 2,
+                "username": "bob",
+                "email": "bob@example.com",
+                "role": "patient",
+                "password_hash": self.password_hasher.hash_password(
+                    "password123"
+                ),
+            },
+        ]
 
-        users = {}
+        self._write_users(seed_users)
 
-        for username, data in raw_users.items():
-            users[username] = User(
-                user_id=data["user_id"],
-                username=data["username"],
-                password_hash=data["password_hash"],
-                email=data["email"],
-                role=data["role"],
-            )
+    def _read_users(self) -> list[dict[str, Any]]:
+        """Read all users from the JSON text file."""
+        with self.file_path.open("r", encoding="utf-8") as file:
+            data = json.load(file)
 
-        return users
+        if not isinstance(data, list):
+            return []
 
-    def _save_users(self) -> None:
-        """
-        Save all users to the local JSON file.
-        """
-        raw_users = {}
+        return data
 
-        for username, user in self.users.items():
-            raw_users[username] = {
-                "user_id": user.user_id,
-                "username": user.username,
-                "password_hash": user.password_hash,
-                "email": user.email,
-                "role": user.role,
-            }
+    def _write_users(self, users: list[dict[str, Any]]) -> None:
+        """Write all users to the JSON text file."""
+        with self.file_path.open("w", encoding="utf-8") as file:
+            json.dump(users, file, indent=2)
 
-        with self.data_path.open("w", encoding="utf-8") as file:
-            json.dump(raw_users, file, indent=2)
+    def _next_user_id(self, users: list[dict[str, Any]]) -> int:
+        """Return the next available integer user ID."""
+        if not users:
+            return 1
+
+        return max(int(user_data.get("user_id", 0)) for user_data in users) + 1
+
+    def _to_user(self, data: dict[str, Any]) -> User:
+        """Convert stored dictionary data into a User model."""
+        return User(
+            user_id=int(data["user_id"]),
+            username=str(data["username"]),
+            password_hash=str(data["password_hash"]),
+            role=str(data["role"]),
+            email=str(data["email"]),
+        )
 
     def find_by_username(self, username: str) -> User | None:
-        """
-        Find a user by username.
+        """Find a user by username."""
+        normalized_username = username.strip().lower()
 
-        Returns None when the username does not exist.
-        """
-        return self.users.get(username)
+        for user_data in self._read_users():
+            stored_username = str(user_data["username"]).strip().lower()
+            if stored_username == normalized_username:
+                return self._to_user(user_data)
+
+        return None
+
+    def find_by_email(self, email: str) -> User | None:
+        """Find a user by email address."""
+        normalized_email = email.strip().lower()
+
+        for user_data in self._read_users():
+            stored_email = str(user_data["email"]).strip().lower()
+            if stored_email == normalized_email:
+                return self._to_user(user_data)
+
+        return None
 
     def create_user(
         self,
@@ -92,39 +118,39 @@ class UserRepository:
         email: str,
     ) -> User:
         """
-        Create and store a new user.
+        Create and persist a new user profile.
 
-        The email is provided once during registration and then stored
-        for future MFA delivery.
+        Duplicate usernames or emails are rejected.
         """
-        if username in self.users:
+        if self.find_by_username(username) is not None:
             raise ValueError("Username already exists.")
 
-        next_user_id = len(self.users) + 1
+        if self.find_by_email(email) is not None:
+            raise ValueError("Email already exists.")
+
+        users = self._read_users()
 
         user = User(
-            user_id=next_user_id,
-            username=username,
+            user_id=self._next_user_id(users),
+            username=username.strip(),
             password_hash=self.password_hasher.hash_password(password),
-            email=email,
-            role=role,
+            role=role.strip().lower(),
+            email=email.strip().lower(),
         )
 
-        self.users[username] = user
-        self._save_users()
+        users.append(
+            {
+                "user_id": user.user_id,
+                "username": user.username,
+                "email": user.email,
+                "role": user.role,
+                "password_hash": user.password_hash,
+            }
+        )
+        self._write_users(users)
 
         return user
 
-    def find_by_email(self, email: str) -> User | None:
-        """
-        Find a user by email address.
-
-        This supports the email-first frontend flow.
-        """
-        normalized_email = email.strip().lower()
-
-        for user in self.users.values():
-            if user.email.strip().lower() == normalized_email:
-                return user
-
-        return None
+    def all_users(self) -> list[User]:
+        """Return all stored users."""
+        return [self._to_user(user_data) for user_data in self._read_users()]
