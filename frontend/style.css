@@ -278,3 +278,33 @@ button:hover {
     grid-template-columns: 1fr;
   }
 }
+.hidden {
+  display: none !important;
+}
+
+.mode-choice {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.mode-choice label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-message.success {
+  border-color: rgba(80, 220, 140, 0.5);
+  background: rgba(20, 80, 45, 0.35);
+}
+
+.status-message.error {
+  border-color: rgba(255, 90, 120, 0.5);
+  background: rgba(95, 20, 45, 0.35);
+}
+
+.secondary-btn {
+  margin-left: 0.75rem;
+}

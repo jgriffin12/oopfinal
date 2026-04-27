@@ -3,200 +3,237 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CJ Secure | CJ Hospital</title>
+  <title>CJ Secure</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-badge">+</div>
-        <div>
-          <h1>CJ Secure</h1>
-          <p>Secure Access Portal for CJ Hospital</p>
-        </div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">+</div>
+      <div>
+        <h1>CJ Secure</h1>
+        <p>Secure Access Portal for CJ Hospital</p>
+      </div>
+    </div>
+
+    <section class="side-card">
+      <h3>Session Status</h3>
+      <p><strong>Authentication:</strong> <span id="auth-status">Not signed in</span></p>
+      <p><strong>Role:</strong> <span id="role-status">None selected</span></p>
+      <p><strong>User:</strong> <span id="user-status">None</span></p>
+    </section>
+
+    <section class="side-card">
+      <h3>Verification Notice</h3>
+      <p>
+        New users must register with an email address first.
+        Later logins send MFA codes to the stored email.
+      </p>
+    </section>
+  </aside>
+
+  <main class="main-content">
+    <section class="hero card">
+      <p class="eyebrow">HOSPITAL SECURITY DEMO</p>
+      <h1>Protected Patient and Provider Access at CJ Hospital</h1>
+      <p>
+        CJ Secure demonstrates hospital-focused authentication, email-based MFA,
+        role-aware access, protected medical record retrieval, and audit logging.
+      </p>
+    </section>
+
+    <div id="global-error" class="status-message hidden"></div>
+
+    <section class="card">
+      <p class="eyebrow">ACCOUNT ACCESS</p>
+      <h2>Are you registering or logging in?</h2>
+
+      <div class="mode-choice">
+        <label>
+          <input
+            id="mode-register"
+            name="auth-mode"
+            type="radio"
+            value="register"
+            checked
+          />
+          Register a new account
+        </label>
+
+        <label>
+          <input
+            id="mode-login"
+            name="auth-mode"
+            type="radio"
+            value="login"
+          />
+          Log in to an existing account
+        </label>
+      </div>
+    </section>
+
+    <section id="register-panel" class="card">
+      <p class="eyebrow">STEP 0</p>
+      <h2>Register for CJ Secure</h2>
+      <p>
+        Register once with your real email. This email will be stored with your
+        account and used later for SendGrid MFA codes.
+      </p>
+
+      <div class="form-grid">
+        <label>
+          I am registering as
+          <select id="register-role">
+            <option value="">Select role</option>
+            <option value="provider">Provider</option>
+            <option value="patient">Patient</option>
+          </select>
+        </label>
+
+        <label>
+          Username
+          <input
+            id="register-username"
+            type="text"
+            placeholder="Create username"
+          />
+        </label>
+
+        <label>
+          Email for MFA
+          <input
+            id="register-email"
+            type="email"
+            placeholder="you@example.com"
+          />
+        </label>
+
+        <label>
+          Password
+          <input
+            id="register-password"
+            type="password"
+            placeholder="Create password"
+          />
+        </label>
       </div>
 
-      <div class="status-panel">
-        <h2>Session Status</h2>
-        <p><strong>Authentication:</strong> <span id="auth-status">Not signed in</span></p>
-        <p><strong>Role:</strong> <span id="role-status">None selected</span></p>
-        <p><strong>User:</strong> <span id="user-status">None</span></p>
+      <button id="register-btn" type="button">Register Account</button>
+    </section>
+
+    <section id="login-panel" class="card hidden">
+      <p class="eyebrow">STEP 1</p>
+      <h2>Log In to CJ Secure</h2>
+      <p>
+        Existing users log in with role, username, and password. The system uses
+        the email stored during registration for MFA.
+      </p>
+
+      <div class="form-grid">
+        <label>
+          I am signing in as
+          <select id="login-role">
+            <option value="">Select role</option>
+            <option value="provider">Provider</option>
+            <option value="patient">Patient</option>
+          </select>
+        </label>
+
+        <label>
+          Username
+          <input id="login-username" type="text" placeholder="Username" />
+        </label>
+
+        <label>
+          Password
+          <input id="login-password" type="password" placeholder="Password" />
+        </label>
       </div>
 
-      <div class="info-panel">
-        <h2>Verification Notice</h2>
-        <p>A verification code will be sent to the registered email address for the selected user account.</p>
-        <p><strong>Demo User:</strong> alice</p>
+      <button id="login-btn" type="button">Send Verification Code</button>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">STEP 2</p>
+      <h2>Verify Email MFA</h2>
+
+      <div class="form-grid">
+        <label>
+          Username
+          <input id="mfa-username" type="text" placeholder="Username" />
+        </label>
+
+        <label>
+          Email Verification Code
+          <input id="mfa-code" type="text" placeholder="Enter code from email" />
+        </label>
       </div>
-    </aside>
 
-    <section class="content">
-      <header class="hero-card">
-        <div>
-          <p class="eyebrow">Hospital Security Demo</p>
-          <h2>Protected Patient and Provider Access at CJ Hospital</h2>
-          <p class="hero-text">
-            CJ Secure demonstrates hospital-focused authentication, email-based MFA,
-            role-aware access, protected medical record retrieval, and audit logging.
-          </p>
-        </div>
-      </header>
+      <button id="mfa-btn" type="button">Verify MFA</button>
+      <button id="logout-btn" type="button" class="secondary-btn">Sign Out</button>
+    </section>
 
-      <div id="global-error" class="alert hidden"></div>
+    <section id="patient-card" class="card hidden">
+      <p class="eyebrow">PATIENT ACCESS</p>
+      <h2>View My Protected Record</h2>
 
-      <section class="card" id="login-card">
-        <div class="card-header">
-          <div>
-            <p class="eyebrow">Step 1</p>
-            <h3>Sign In to CJ Secure</h3>
-          </div>
-        </div>
+      <div class="form-grid">
+        <label>
+          Username
+          <input id="patient-username" type="text" placeholder="Username" />
+        </label>
 
-        <div class="form-grid">
-          <div>
-            <label for="login-role">I am signing in as</label>
-            <select id="login-role" required>
-              <option value="">Select role</option>
-              <option value="provider">Provider</option>
-              <option value="patient">Patient</option>
-            </select>
-          </div>
+        <label>
+          Medical Record ID
+          <input id="patient-record-id" type="number" value="1" />
+        </label>
+      </div>
 
-          <div>
-            <label for="login-username">Username</label>
-            <input id="login-username" type="text" placeholder="alice" />
-          </div>
+      <button id="patient-record-btn" type="button">View My Record</button>
+    </section>
 
-          <div>
-            <label for="login-password">Password</label>
-            <input id="login-password" type="password" placeholder="password123" />
-          </div>
-        </div>
+    <section id="provider-card" class="card hidden">
+      <p class="eyebrow">PROVIDER ACCESS</p>
+      <h2>Retrieve Protected Patient Record</h2>
 
-        <div class="button-row">
-          <button id="login-btn">Send Verification Code</button>
-        </div>
-      </section>
+      <div class="form-grid">
+        <label>
+          Provider Username
+          <input id="provider-username" type="text" placeholder="Provider username" />
+        </label>
 
-      <section class="card" id="mfa-card">
-        <div class="card-header">
-          <div>
-            <p class="eyebrow">Step 2</p>
-            <h3>Verify Email MFA</h3>
-          </div>
-        </div>
+        <label>
+          Patient Record ID
+          <input id="provider-record-id" type="number" value="1" />
+        </label>
+      </div>
 
-        <div class="form-grid">
-          <div>
-            <label for="mfa-username">Username</label>
-            <input id="mfa-username" type="text" placeholder="alice" />
-          </div>
+      <button id="provider-record-btn" type="button">Retrieve Protected Record</button>
+    </section>
 
-          <div>
-            <label for="mfa-code">Email Verification Code</label>
-            <input id="mfa-code" type="text" placeholder="Enter code from email" />
-          </div>
-        </div>
+    <section id="audit-card" class="card hidden">
+      <p class="eyebrow">AUDIT LOGGING</p>
+      <h2>Review Security Events</h2>
 
-        <div class="button-row">
-          <button id="mfa-btn">Verify MFA</button>
-        </div>
-      </section>
+      <div class="form-grid">
+        <label>
+          Provider Username
+          <input id="audit-username" type="text" placeholder="Provider username" />
+        </label>
+      </div>
 
-      <section class="card hidden" id="patient-card">
-        <div class="card-header">
-          <div>
-            <p class="eyebrow">Patient Access</p>
-            <h3>View My Medical Record</h3>
-          </div>
-        </div>
+      <button id="audit-btn" type="button">View Audit Logs</button>
+    </section>
 
-        <p class="section-text">
-          Patients can view a protected, masked version of their medical record information.
-        </p>
+    <section class="card">
+      <p class="eyebrow">SYSTEM OUTPUT</p>
+      <h2>Backend Response</h2>
 
-        <div class="form-grid">
-          <div>
-            <label for="patient-username">Username</label>
-            <input id="patient-username" type="text" placeholder="alice" />
-          </div>
+      <pre id="output">Responses will appear here.</pre>
 
-          <div>
-            <label for="patient-record-id">Medical Record ID</label>
-            <input id="patient-record-id" type="number" placeholder="1" min="1" />
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button id="patient-record-btn">View My Record</button>
-        </div>
-      </section>
-
-      <section class="card hidden" id="provider-card">
-        <div class="card-header">
-          <div>
-            <p class="eyebrow">Provider Access</p>
-            <h3>Retrieve Patient Medical Record</h3>
-          </div>
-        </div>
-
-        <p class="section-text">
-          Providers can retrieve protected patient data through the secured CJ Hospital backend.
-        </p>
-
-        <div class="form-grid">
-          <div>
-            <label for="provider-username">Provider Username</label>
-            <input id="provider-username" type="text" placeholder="alice" />
-          </div>
-
-          <div>
-            <label for="provider-record-id">Patient Record ID</label>
-            <input id="provider-record-id" type="number" placeholder="1" min="1" />
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button id="provider-record-btn">Retrieve Patient Record</button>
-        </div>
-      </section>
-
-      <section class="card hidden" id="audit-card">
-        <div class="card-header">
-          <div>
-            <p class="eyebrow">Administrative Access</p>
-            <h3>Review Security Audit Logs</h3>
-          </div>
-        </div>
-
-        <p class="section-text">
-          Authorized users can review recorded security events such as login attempts and medical record access.
-        </p>
-
-        <div class="form-grid single-column">
-          <div>
-            <label for="audit-username">Username</label>
-            <input id="audit-username" type="text" placeholder="alice" />
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button id="audit-btn">View Audit Logs</button>
-        </div>
-      </section>
-
-      <section class="card output-card">
-        <div class="card-header">
-          <div>
-            <p class="eyebrow">System Output</p>
-            <h3>Response Viewer</h3>
-          </div>
-          <button id="clear-output-btn" class="secondary-btn">Clear</button>
-        </div>
-
-        <pre id="output">Responses will appear here.</pre>
-      </section>
+      <button id="clear-output-btn" type="button" class="secondary-btn">
+        Clear Output
+      </button>
     </section>
   </main>
 

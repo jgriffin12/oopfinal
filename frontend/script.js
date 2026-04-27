@@ -1,4 +1,4 @@
-const API_BASE = "https://cj-secure-webs.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
 
 const outputEl = document.getElementById("output");
 const authStatusEl = document.getElementById("auth-status");
@@ -6,110 +6,132 @@ const roleStatusEl = document.getElementById("role-status");
 const userStatusEl = document.getElementById("user-status");
 const globalErrorEl = document.getElementById("global-error");
 
-const patientCard = document.getElementById("patient-card");
-const providerCard = document.getElementById("provider-card");
-const auditCard = document.getElementById("audit-card");
+const registerPanel = document.getElementById("register-panel");
+const loginPanel = document.getElementById("login-panel");
 
 let sessionState = {
   loggedIn: false,
   mfaVerified: false,
   username: "",
-  role: ""
+  role: "",
 };
 
 function showOutput(data) {
   outputEl.textContent = JSON.stringify(data, null, 2);
 }
 
-function showError(message) {
+function showMessage(message, type = "info") {
   globalErrorEl.textContent = message;
   globalErrorEl.classList.remove("hidden");
 
-  outputEl.textContent = JSON.stringify(
-    { status: "failure", message },
-    null,
-    2
-  );
+  if (type === "success") {
+    globalErrorEl.classList.remove("error");
+    globalErrorEl.classList.add("success");
+  } else {
+    globalErrorEl.classList.remove("success");
+    globalErrorEl.classList.add("error");
+  }
 }
 
-function clearError() {
+function clearMessage() {
   globalErrorEl.textContent = "";
   globalErrorEl.classList.add("hidden");
+  globalErrorEl.classList.remove("error", "success");
 }
 
 function updateStatusPanel() {
-  authStatusEl.textContent = sessionState.mfaVerified
-    ? "Authenticated"
-    : sessionState.loggedIn
-      ? "Password accepted, email verification pending"
-      : "Not signed in";
+  if (sessionState.mfaVerified) {
+    authStatusEl.textContent = "Authenticated";
+  } else if (sessionState.loggedIn) {
+    authStatusEl.textContent = "MFA pending";
+  } else {
+    authStatusEl.textContent = "Not signed in";
+  }
 
   roleStatusEl.textContent = sessionState.role || "None selected";
   userStatusEl.textContent = sessionState.username || "None";
 }
 
-function updateVisibleSections() {
-  patientCard.classList.add("hidden");
-  providerCard.classList.add("hidden");
-  auditCard.classList.add("hidden");
+function switchAuthMode() {
+  const selectedMode = document.querySelector(
+    'input[name="auth-mode"]:checked'
+  ).value;
 
-  if (!sessionState.mfaVerified) {
-    return;
+  if (selectedMode === "register") {
+    registerPanel.classList.remove("hidden");
+    loginPanel.classList.add("hidden");
+  } else {
+    registerPanel.classList.add("hidden");
+    loginPanel.classList.remove("hidden");
   }
 
-  if (sessionState.role === "patient") {
-    patientCard.classList.remove("hidden");
-  }
-
-  if (sessionState.role === "provider") {
-    providerCard.classList.remove("hidden");
-    auditCard.classList.remove("hidden");
-  }
+  clearMessage();
 }
 
 async function handleResponse(response) {
-  let data;
+  const data = await response.json();
 
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error("Server returned a non-JSON response.");
-  }
-
-  if (!response.ok) {
+  if (!response.ok || data.status === "error" || data.status === "failure") {
     throw new Error(data.message || "Request failed.");
   }
 
   return data;
 }
 
-function requireAuthenticatedSession() {
-  if (!sessionState.mfaVerified) {
-    showError("Please complete login and email verification first.");
-    return false;
+async function registerUser() {
+  clearMessage();
+
+  const role = document.getElementById("register-role").value;
+  const username = document.getElementById("register-username").value.trim();
+  const email = document.getElementById("register-email").value.trim();
+  const password = document.getElementById("register-password").value;
+
+  if (!role || !username || !email || !password) {
+    showMessage("Role, username, email, and password are required.", "error");
+    return;
   }
-  return true;
+
+  try {
+    const response = await fetch(`${API_BASE}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        role,
+        username,
+        email,
+        password,
+      }),
+    });
+
+    const data = await handleResponse(response);
+    showOutput(data);
+
+    document.getElementById("login-role").value = role;
+    document.getElementById("login-username").value = username;
+
+    showMessage(
+      "Registration complete. Your email is stored for MFA. You can now log in.",
+      "success"
+    );
+
+    document.getElementById("mode-login").checked = true;
+    switchAuthMode();
+  } catch (error) {
+    showMessage(error.message, "error");
+  }
 }
 
-async function login() {
-  clearError();
+async function loginUser() {
+  clearMessage();
 
-  const role = document.getElementById("login-role").value.trim();
+  const role = document.getElementById("login-role").value;
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value;
 
-  if (!role) {
-    showError("Please select whether you are a provider or patient.");
-    return;
-  }
-
-  if (!username) {
-    showError("Please enter your username.");
-    return;
-  }
-
-  if (!password) {
-    showError("Please enter your password.");
+  if (!role || !username || !password) {
+    showMessage("Role, username, and password are required.", "error");
     return;
   }
 
@@ -117,56 +139,63 @@ async function login() {
     const response = await fetch(`${API_BASE}/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username: username,
-        password: password,
-        role: role,
-        email: email
-      })
+        role,
+        username,
+        password,
+      }),
     });
 
     const data = await handleResponse(response);
     showOutput(data);
 
-    if (data.status === "pending") {
-      sessionState.loggedIn = true;
-      sessionState.mfaVerified = false;
-      sessionState.username = username;
-      sessionState.role = role;
+    sessionState.loggedIn = true;
+    sessionState.mfaVerified = false;
+    sessionState.username = data.username || username;
+    sessionState.role = data.role || role;
 
-      document.getElementById("mfa-username").value = username;
-      document.getElementById("patient-username").value = username;
-      document.getElementById("provider-username").value = username;
-      document.getElementById("audit-username").value = username;
-    } else {
-      sessionState.loggedIn = false;
-      sessionState.mfaVerified = false;
-      sessionState.username = "";
-      sessionState.role = "";
+    document.getElementById("mfa-username").value = sessionState.username;
+
+    const patientUsername = document.getElementById("patient-username");
+    const providerUsername = document.getElementById("provider-username");
+    const auditUsername = document.getElementById("audit-username");
+
+    if (patientUsername) {
+      patientUsername.value = sessionState.username;
+    }
+
+    if (providerUsername) {
+      providerUsername.value = sessionState.username;
+    }
+
+    if (auditUsername) {
+      auditUsername.value = sessionState.username;
     }
 
     updateStatusPanel();
-    updateVisibleSections();
+
+    showMessage(
+      "Password accepted. Check your registered email for the MFA code.",
+      "success"
+    );
   } catch (error) {
-    showError(error.message);
+    showMessage(
+      `${error.message} If this is a new user, register first with an email.`,
+      "error"
+    );
   }
 }
 
 async function verifyMfa() {
-  clearError();
+  clearMessage();
 
   const username = document.getElementById("mfa-username").value.trim();
   const code = document.getElementById("mfa-code").value.trim();
 
-  if (!username) {
-    showError("Please enter your username before verifying MFA.");
-    return;
-  }
-
-  if (!code) {
-    showError("Please enter the verification code sent to your email.");
+  if (!username || !code) {
+    showMessage("Username and MFA code are required.", "error");
     return;
   }
 
@@ -174,129 +203,102 @@ async function verifyMfa() {
     const response = await fetch(`${API_BASE}/verify-mfa`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, code })
+      body: JSON.stringify({
+        username,
+        code,
+      }),
     });
 
     const data = await handleResponse(response);
     showOutput(data);
 
-    if (data.status === "success") {
-      sessionState.mfaVerified = true;
-    }
+    sessionState.mfaVerified = true;
+    sessionState.username = data.username || username;
+    sessionState.role = data.role || sessionState.role;
 
     updateStatusPanel();
-    updateVisibleSections();
+    showMessage("MFA verified. Login complete.", "success");
   } catch (error) {
-    showError(error.message);
-  }
-}
-
-async function getPatientRecord() {
-  clearError();
-
-  if (!requireAuthenticatedSession()) {
-    return;
-  }
-
-  if (sessionState.role !== "patient") {
-    showError("This section is for patient access only.");
-    return;
-  }
-
-  const username = document.getElementById("patient-username").value.trim();
-  const recordId = document.getElementById("patient-record-id").value.trim();
-
-  if (!username || !recordId) {
-    showError("Please enter both your username and medical record ID.");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `${API_BASE}/records/${encodeURIComponent(recordId)}?username=${encodeURIComponent(username)}`
-    );
-
-    const data = await handleResponse(response);
-    showOutput(data);
-  } catch (error) {
-    showError(error.message);
+    showMessage(error.message, "error");
   }
 }
 
 async function getProviderRecord() {
-  clearError();
+  clearMessage();
 
-  if (!requireAuthenticatedSession()) {
+  if (!sessionState.mfaVerified) {
+    showMessage("Please complete login and MFA first.", "error");
     return;
   }
 
-  if (sessionState.role !== "provider") {
-    showError("This section is for provider access only.");
-    return;
-  }
-
-  const username = document.getElementById("provider-username").value.trim();
   const recordId = document.getElementById("provider-record-id").value.trim();
-
-  if (!username || !recordId) {
-    showError("Please enter both provider username and patient record ID.");
-    return;
-  }
+  const username = sessionState.username;
 
   try {
     const response = await fetch(
-      `${API_BASE}/records/${encodeURIComponent(recordId)}?username=${encodeURIComponent(username)}`
+      `${API_BASE}/records/${recordId}?username=${encodeURIComponent(username)}`
     );
 
     const data = await handleResponse(response);
     showOutput(data);
+    showMessage("Protected record retrieved.", "success");
   } catch (error) {
-    showError(error.message);
+    showMessage(error.message, "error");
   }
 }
 
-async function getAuditLogs() {
-  clearError();
+async function logoutUser() {
+  clearMessage();
 
-  if (!requireAuthenticatedSession()) {
-    return;
+  if (sessionState.username) {
+    try {
+      await fetch(`${API_BASE}/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: sessionState.username,
+        }),
+      });
+    } catch {
+      // Clear local session even if logout route fails.
+    }
   }
 
-  if (sessionState.role !== "provider") {
-    showError("Only provider-side access should open audit logs in this demo.");
-    return;
-  }
+  sessionState = {
+    loggedIn: false,
+    mfaVerified: false,
+    username: "",
+    role: "",
+  };
 
-  const username = document.getElementById("audit-username").value.trim();
-
-  if (!username) {
-    showError("Please enter a username before viewing audit logs.");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `${API_BASE}/admin/audit?username=${encodeURIComponent(username)}`
-    );
-
-    const data = await handleResponse(response);
-    showOutput(data);
-  } catch (error) {
-    showError(error.message);
-  }
+  updateStatusPanel();
+  showMessage("Signed out. You can register or log in again.", "success");
 }
 
-document.getElementById("login-btn").addEventListener("click", login);
-document.getElementById("mfa-btn").addEventListener("click", verifyMfa);
-document.getElementById("patient-record-btn").addEventListener("click", getPatientRecord);
-document.getElementById("provider-record-btn").addEventListener("click", getProviderRecord);
-document.getElementById("audit-btn").addEventListener("click", getAuditLogs);
-document.getElementById("clear-output-btn").addEventListener("click", () => {
-  clearError();
-  outputEl.textContent = "Responses will appear here.";
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("mode-register").addEventListener(
+    "change",
+    switchAuthMode
+  );
+  document.getElementById("mode-login").addEventListener("change", switchAuthMode);
+  document.getElementById("register-btn").addEventListener("click", registerUser);
+  document.getElementById("login-btn").addEventListener("click", loginUser);
+  document.getElementById("mfa-btn").addEventListener("click", verifyMfa);
+
+  const providerRecordButton = document.getElementById("provider-record-btn");
+  if (providerRecordButton) {
+    providerRecordButton.addEventListener("click", getProviderRecord);
+  }
+
+  const logoutButton = document.getElementById("logout-btn");
+  if (logoutButton) {
+    logoutButton.addEventListener("click", logoutUser);
+  }
+
+  updateStatusPanel();
+  switchAuthMode();
 });
-
-updateStatusPanel();
-updateVisibleSections();
