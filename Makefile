@@ -1,15 +1,19 @@
-# Install all Python dependencies from requirements.txt
 install:
 	pip install -r requirements.txt
 
-# Run the Flask application locally
 run:
-	python -m app.main
+	python -m apps.main
 
-# Run all tests
 test:
-	pytest
+	pytest -q
 
-# Run static type checking on the app package
+coverage:
+	pytest --cov=apps --cov-report=term-missing
+
 typecheck:
 	mypy apps
+
+style:
+	flake8 apps tests
+
+check: style typecheck test coverage

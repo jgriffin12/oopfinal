@@ -1,20 +1,9 @@
-# Web framework for the application
 flask
-
-# Accepts requests from different origins
 flask-cors
-
-# Needed for Render 
 gunicorn
-
-# Unit testing framework
 pytest
-
-# Property-based testing library
 hypothesis
-
-# Static type checker
 mypy
-
-#sendgrid emails MFA
+pytest-cov
+flake8
 sendgrid

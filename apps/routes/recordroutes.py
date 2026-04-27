@@ -6,6 +6,7 @@ record_bp = Blueprint("records", __name__)
 
 record_controller = RecordController()
 
+
 @record_bp.route("/records/<int:record_id>", methods=["GET"])
 def get_record(record_id: int):
     """
@@ -19,7 +20,8 @@ def get_record(record_id: int):
     """
     username = request.args.get("username")
 
-    if not username: 
-        return jsonify({"status": "failure", "message": "Username required."}), 400
+    if not username:
+        return jsonify(
+            {"status": "failure", "message": "Username required."}), 400
 
     return jsonify(record_controller.get_record(record_id, username))

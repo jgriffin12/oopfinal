@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from apps.models.secEvent import SecurityEvent
 from apps.repositories.auditRepo import AuditRepository
 
@@ -36,13 +36,17 @@ class AuditLogger:
         self.next_event_id = 1
         self.__class__._initialized = True
 
-    def log_event(self, event_type: str, username: str, status: str) -> SecurityEvent:
+    def log_event(
+            self,
+            event_type: str,
+            username: str,
+            status: str) -> SecurityEvent:
         """
         Create and store a new security event.
         """
         event = SecurityEvent(
             event_id=self.next_event_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             event_type=event_type,
             username=username,
             status=status,

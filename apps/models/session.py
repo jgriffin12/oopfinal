@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 @dataclass
@@ -19,15 +19,20 @@ class Session:
         """
         Return True if the session has not expired yet.
         """
-        return datetime.utcnow() < self.expires_at
+        return datetime.now(timezone.utc) < self.expires_at
 
     @staticmethod
-    def create_new(session_id: str, username: str, duration_minutes: int = 30) -> "Session":
+    def create_new(
+        session_id: str,
+        username: str,
+        duration_minutes: int = 30,
+    ) -> "Session":
         """
         Helper method for creating a new session with a default expiration time.
         """
-        created = datetime.utcnow()
+        created = datetime.now(timezone.utc)
         expires = created + timedelta(minutes=duration_minutes)
+
         return Session(
             session_id=session_id,
             username=username,

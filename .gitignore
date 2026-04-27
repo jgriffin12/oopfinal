@@ -46,3 +46,7 @@ npm-debug.log*
 # Environment variables / secrets
 .env
 .env.*
+*.env
+!.env.example
+# Local demo user storage
+data/users.json

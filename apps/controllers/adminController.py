@@ -20,7 +20,8 @@ class AdminController:
             return {"status": "failure", "message": "User not found"}
 
         if not self.access_control_service.is_authorized(user, "review_logs"):
-            self.audit_logger.log_event("audit_access_denied", username, "failure")
+            self.audit_logger.log_event(
+                "audit_access_denied", username, "failure")
             return {"status": "failure", "message": "Access denied"}
 
         events = self.audit_logger.get_all_events()

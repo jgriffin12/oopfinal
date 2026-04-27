@@ -8,7 +8,11 @@ def test_login_route_exists():
     app = create_app()
     client = app.test_client()
 
-    response = client.post("/login", json={"username": "alice", "password": "password123"})
+    response = client.post(
+        "/login",
+        json={
+            "username": "alice",
+            "password": "password123"})
     assert response.status_code == 200
     assert response.is_json is True
 
@@ -20,7 +24,11 @@ def test_verify_mfa_route_exists():
     app = create_app()
     client = app.test_client()
 
-    response = client.post("/verify-mfa", json={"username": "alice", "code": "123456"})
+    response = client.post(
+        "/verify-mfa",
+        json={
+            "username": "alice",
+            "code": "123456"})
     assert response.status_code == 200
     assert response.is_json is True
 

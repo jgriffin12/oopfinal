@@ -9,9 +9,15 @@ class AccessControlService:
     def __init__(self) -> None:
         # Simple in-memory permission model for the prototype.
         self.role_permissions = {
-            "doctor": {"view_record", "view_masked_record"},
+            "doctor": {
+                "view_record",
+                "view_masked_record"},
             "nurse": {"view_masked_record"},
-            "admin": {"view_record", "view_masked_record", "manage_users", "review_logs"},
+            "admin": {
+                "view_record",
+                "view_masked_record",
+                "manage_users",
+                "review_logs"},
             "auditor": {"review_logs"},
         }
 

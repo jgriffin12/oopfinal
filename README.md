@@ -163,3 +163,19 @@ docker-compose.yml
 Makefile
 requirements.txt
 README.md
+
+## How to Run
+
+```bash
+pip install -r requirements.txt
+python -m apps.main
+
+## Demo Instructions
+
+### Backup MFA Demo Mode
+
+For the class demo, the project can use the backup TOTP MFA strategy so the demo does not depend on email delivery.
+
+```bash
+export MFA_METHOD=totp
+python -m apps.main

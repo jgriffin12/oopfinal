@@ -27,13 +27,16 @@ class RecordService:
         Before returning the data, this method masks or tokenizes sensitive
         fields so the interface does not expose raw confidential values.
         """
-        if not self.access_control_service.is_authorized(user, "view_masked_record"):
-            self.audit_logger.log_event("access_denied", user.username, "failure")
+        if not self.access_control_service.is_authorized(
+                user, "view_masked_record"):
+            self.audit_logger.log_event(
+                "access_denied", user.username, "failure")
             return {"status": "failure", "message": "Access denied"}
 
         record = self.record_repository.find_by_id(record_id)
         if record is None:
-            self.audit_logger.log_event("record_not_found", user.username, "failure")
+            self.audit_logger.log_event(
+                "record_not_found", user.username, "failure")
             return {"status": "failure", "message": "Record not found"}
 
         protected_record = {

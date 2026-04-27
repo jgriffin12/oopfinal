@@ -1,14 +1,7 @@
-version: "3.9"
-
 services:
   web:
-    # Build the image from the Dockerfile in the current directory
     build: .
-
-    # Map local port 5000 to container port 5000
     ports:
       - "5000:5000"
-
-    # Mount the current directory into the container for easier development
     volumes:
-      - .:/app
+      - .:/apps
