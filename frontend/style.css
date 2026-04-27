@@ -13,9 +13,9 @@ body {
 }
 
 .auth-shell {
-  width: min(1180px, calc(100% - 3rem));
-  min-height: calc(100vh - 5rem);
-  margin: 2.5rem auto;
+  width: min(1050px, calc(100% - 4rem));
+  min-height: 680px;
+  margin: 2rem auto;
   display: grid;
   grid-template-columns: 0.9fr 1fr;
   overflow: hidden;
@@ -42,16 +42,13 @@ body {
 }
 
 .brand-icon {
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border-radius: 18px;
-  color: white;
-  font-size: 2rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #7c3aed, #c084fc);
-  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.32);
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 6px;
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.25);
 }
 
 .brand-row h1,
@@ -279,4 +276,31 @@ pre {
   display: block;
   object-fit: contain;
   filter: drop-shadow(0 18px 30px rgba(76, 29, 149, 0.18));
+}
+
+.hospital-logo img {
+  width: min(260px, 75%);
+  max-height: 90px;
+  object-fit: contain;
+}
+
+.doctor-illustration {
+  position: absolute;
+  right: -1rem;
+  bottom: 7rem;
+  width: min(330px, 68%);
+  z-index: 1;
+}
+
+.doctor-illustration img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 30px rgba(76, 29, 149, 0.18));
+}
+
+.session-card {
+  position: relative;
+  z-index: 2;
 }
