@@ -1,35 +1,45 @@
 @startuml
-skinparam shadowing false
+title 05 - Physical / Deployment View
 
-title Physical View - Deployment Diagram
+skinparam componentStyle rectangle
+skinparam nodeStyle rectangle
 
-node "User Device" {
-  artifact "Browser" as Browser
+actor "User / Provider / Admin" as User
+
+node "User Device\n(Web Browser)" {
+  artifact "Static Frontend\nfrontend/index.html\nfrontend/style.css\nfrontend/script.js" as Frontend
 }
 
-node "Docker Host" {
-  node "Web Application Container" {
-    artifact "Python Flask Web App" as App
-    artifact "Authentication Logic" as Auth
-    artifact "MFA Logic" as MFAApp
-    artifact "RBAC Logic" as RBAC
-    artifact "Record Service" as RecordSvc
-    artifact "Audit Logger" as Audit
+node "GitHub Pages\nFrontend Hosting" {
+  artifact "CJ Secure Static Site" as GitHubPages
+}
+
+node "Render\nBackend Hosting" {
+  node "Flask Web Service" {
+    artifact "apps/main.py" as Main
+    component "Flask API Routes\napps/routes/" as Routes
+    component "Controllers\napps/controllers/" as Controllers
+    component "Services\napps/services/" as Services
+    component "Security Layer\napps/security/" as Security
+    component "Repositories\napps/repositories/" as Repositories
+    component "Models\napps/models/" as Models
   }
-
-  database "Application Database" as DB
 }
 
-node "External Service" {
-  artifact "MFA Provider" as MFAProvider
+node "Runtime Memory\nDemo Storage" {
+  database "In-Memory Repositories\nUsers, Records, Audit Events" as MemoryStore
 }
 
-Browser --> App : HTTPS
-App --> Auth
-App --> MFAApp
-App --> RBAC
-App --> RecordSvc
-App --> Audit
-App --> DB : read/write users,\nroles, records, logs
-MFAApp --> MFAProvider : send/verify codes
+User --> Frontend : uses portal
+Frontend --> GitHubPages : loads static files
+Frontend --> Routes : HTTPS API requests
+
+Main --> Routes : registers blueprints
+Routes --> Controllers : delegates requests
+Controllers --> Services : coordinates logic
+Services --> Security : password hashing,\nMFA, masking, tokenization
+Services --> Repositories : reads/writes demo data
+Repositories --> Models : creates domain objects
+Repositories --> MemoryStore : stores demo state
+
 @enduml

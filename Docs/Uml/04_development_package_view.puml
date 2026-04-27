@@ -1,112 +1,104 @@
 @startuml
-left to right direction
+title 04 - Development / Package View
+
 skinparam packageStyle rectangle
-skinparam shadowing false
 
-title Development View - Package Structure
+package "frontend/" {
+  [index.html]
+  [style.css]
+  [script.js]
+}
 
-package "Apps" {
-  package "Routes" {
-    [authRoutes.py]
-    [recordRoutes.py]
-    [adminRoutes.py]
-  }
-
-  package "Controllers" {
-    [loginController.py]
-    [recordController.py]
-    [adminController.py]
-  }
-
-  package "Models" {
-    [user.py]
-    [role.py]
-    [permission.py]
-    [record.py]
-    [session.py]
-    [securityEvent.py]
-  }
-
-  package "Services" {
-    [authSvc.py]
-    [mfaSvc.py]
-    [accessControlSvc.py]
-    [recordSvc.py]
-    [auditLogger.py]
-  }
-
-  package "Security" {
-    [PassHash.py]
-    [masker.py]
-    [Tokenizer.py]
-    [mfaStrategies.py]
-    [mfaFactory.py]
-  }
-
-  package "Repositories" {
-    [userRepo.py]
-    [recordRepo.py]
-    [auditRepo.py]
-  }
-
-  package "Templates" {
-    [login.html]
-    [dashboard.html]
-  }
-
-  package "Static" {
-    [styles.css]
-  }
-
+package "apps/" {
   [main.py]
+
+  package "routes/" {
+    [authRoutes.py]
+    [recordroutes.py]
+    [adminroutes.py]
+  }
+
+  package "controllers/" {
+    [AuthController]
+  }
+
+  package "services/" {
+    [AuthService]
+    [MFAService]
+    [RecordService]
+    [AccessControlService]
+    [AuditLogger]
+  }
+
+  package "security/" {
+    [PasswordHasher]
+    [MFAFactory]
+    [MFAStrategy]
+    [EmailMFAStrategy]
+    [SensitiveDataMasker]
+    [Tokenizer]
+  }
+
+  package "repositories/" {
+    [UserRepository]
+    [RecordRepository]
+    [AuditRepository]
+  }
+
+  package "models/" {
+    [User]
+    [MedicalRecord]
+    [SecurityEvent]
+  }
 }
 
-package "Tests" {
-  [testAuthSvc.py]
-  [testAccessControlSvc.py]
-  [testAuditLogger.py]
-  [testMasker.py]
-  [testPropAuth.py]
-  [testRoutes.py]
+package "tests/" {
+  [Unit Tests]
+  [Property-Based Tests]
 }
 
-package "Docs" {
-  [UML]
+package "Docs/Uml/" {
+  [UML Diagrams]
 }
+
+[index.html] --> [script.js]
+[script.js] --> [authRoutes.py] : API calls
+[script.js] --> [recordroutes.py] : API calls
+[script.js] --> [adminroutes.py] : API calls
 
 [main.py] --> [authRoutes.py]
-[main.py] --> [recordRoutes.py]
-[main.py] --> [adminRoutes.py]
+[main.py] --> [recordroutes.py]
+[main.py] --> [adminroutes.py]
 
-[authRoutes.py] --> [loginController.py]
-[recordRoutes.py] --> [recordController.py]
-[adminRoutes.py] --> [adminController.py]
+[authRoutes.py] --> [AuthController]
+[AuthController] --> [AuthService]
 
-[loginController.py] --> [authSvc.py]
-[recordController.py] --> [recordSvc.py]
-[adminController.py] --> [auditLogger.py]
+[recordroutes.py] --> [RecordService]
+[adminroutes.py] --> [AuditLogger]
 
-[authSvc.py] --> [userRepo.py]
-[authSvc.py] --> [PassHash.py]
-[authSvc.py] --> [mfaSvc.py]
-[authSvc.py] --> [auditLogger.py]
+[AuthService] --> [UserRepository]
+[AuthService] --> [PasswordHasher]
+[AuthService] --> [MFAService]
+[AuthService] --> [AuditLogger]
 
-[mfaSvc.py] --> [mfaFactory.py]
-[mfaFactory.py] --> [mfaStrategies.py]
+[MFAService] --> [MFAFactory]
+[MFAFactory] --> [MFAStrategy]
+[MFAStrategy] <|.. [EmailMFAStrategy]
 
-[recordSvc.py] --> [recordRepo.py]
-[recordSvc.py] --> [accessControlSvc.py]
-[recordSvc.py] --> [masker.py]
-[recordSvc.py] --> [Tokenizer.py]
-[recordSvc.py] --> [auditLogger.py]
+[RecordService] --> [RecordRepository]
+[RecordService] --> [AccessControlService]
+[RecordService] --> [SensitiveDataMasker]
+[RecordService] --> [Tokenizer]
+[RecordService] --> [AuditLogger]
 
-[auditLogger.py] --> [auditRepo.py]
+[AuditLogger] --> [AuditRepository]
 
-[testAuthSvc.py] --> [authSvc.py]
-[testAccessControlSvc.py] --> [accessControlSvc.py]
-[testAuditLogger.py] --> [auditLogger.py]
-[testMasker.py] --> [masker.py]
-[testPropAuth.py] --> [authSvc.py]
-[testRoutes.py] --> [authRoutes.py]
-[testRoutes.py] --> [recordRoutes.py]
+[UserRepository] --> [User]
+[RecordRepository] --> [MedicalRecord]
+[AuditRepository] --> [SecurityEvent]
+
+[Unit Tests] --> [services/]
+[Unit Tests] --> [security/]
+[Property-Based Tests] --> [security/]
+
 @enduml
