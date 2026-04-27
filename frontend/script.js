@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://expert-engine-69gwvjjpx7ww25gqg-5000.app.github.dev/";
 
 let selectedEmail = "";
 let selectedUsername = "";
