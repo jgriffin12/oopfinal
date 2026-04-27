@@ -12,9 +12,18 @@ jobs:
     name: Run Python checks
     runs-on: ubuntu-latest
 
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Show project files
+        run: |
+          pwd
+          ls -la
+          ls -la apps
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,10 +36,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run style check
-        run: flake8 apps tests
+        run: python -m flake8 apps tests
 
       - name: Run type check
-        run: mypy apps
+        run: python -m mypy apps
 
       - name: Run tests with coverage
-        run: pytest --cov=apps --cov-report=term-missing
+        run: python -m pytest --cov=apps --cov-report=term-missing
