@@ -17,6 +17,11 @@ const authStatusEl = document.getElementById("auth-status");
 const roleStatusEl = document.getElementById("role-status");
 const userStatusEl = document.getElementById("user-status");
 
+const recordUsernameInput = document.getElementById("record-username");
+const recordIdInput = document.getElementById("record-id");
+const recordButton = document.getElementById("record-btn");
+const recordAccessNote = document.getElementById("record-access-note");
+
 function showPanel(panel) {
   [emailPanel, loginPanel, registerPanel, mfaPanel, protectedPanel].forEach(
     (item) => item.classList.add("hidden")
@@ -39,6 +44,8 @@ function updateSession(authenticated, username = "", role = "") {
   roleStatusEl.textContent = role || "None selected";
   userStatusEl.textContent = username || "None";
 }
+
+
 
 async function handleResponse(response) {
   const data = await response.json();
@@ -212,7 +219,7 @@ async function verifyMfa() {
 
     updateSession(true, selectedUsername, selectedRole);
 
-    document.getElementById("record-username").value = selectedUsername;
+    assignRecordAccess(selectedUsername, selectedRole);
 
     showMessage("MFA verified. You are signed in.", "success");
     showPanel(protectedPanel);
@@ -250,6 +257,11 @@ function signOut() {
   selectedRole = "";
 
   updateSession(false);
+  recordUsernameInput.value = "";
+  recordIdInput.value = "1";
+  recordButton.disabled = false;
+  recordAccessNote.textContent =
+  "Record access is assigned after MFA based on the authenticated user's role.";
   showMessage("Signed out. Enter an email to begin again.", "success");
   showPanel(emailPanel);
 }

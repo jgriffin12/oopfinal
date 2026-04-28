@@ -262,6 +262,19 @@ button:hover {
   background: #6d5b83;
 }
 
+.access-note {
+  margin: -0.35rem 0 0.25rem;
+  color: #6b5c7f;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
 .message {
   margin-bottom: 1.15rem;
   padding: 0.9rem 1rem;

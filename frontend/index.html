@@ -193,9 +193,13 @@
         </label>
 
         <label>
-          Record ID
-          <input id="record-id" type="number" value="1" />
+          Assigned Record ID
+          <input id="record-id" type="number" value="1" readonly />
         </label>
+
+        <p id="record-access-note" class="access-note">
+         Record access is assigned after MFA based on the authenticated user's role.
+        </p>
 
         <button id="record-btn" type="button">
           Retrieve Protected Record
