@@ -1,7 +1,12 @@
 services:
-  web:
+  backend:
     build: .
+    container_name: cj-secure-backend
     ports:
       - "5000:5000"
+    environment:
+      - MFA_METHOD=totp
+      - PYTHONPATH=/app
     volumes:
-      - .:/apps
+      - .:/app
+    command: python -m apps.main

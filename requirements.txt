@@ -4,6 +4,4 @@ gunicorn
 pytest
 hypothesis
 mypy
-pytest-cov
-flake8
 sendgrid

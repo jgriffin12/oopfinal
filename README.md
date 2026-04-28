@@ -182,3 +182,5 @@ python -m apps.main
 
 tools we used for images and format : 
 PicsArt background Remover , Chat GPT Image creator, https://dribbble.com/shots/15160568-Dashboard-Login-screen inspo , https://app.sendgrid.com/settings/api_keys for mfa auth , 
+
+The backend runs inside a Docker container and is exposed through port 5000. Docker Compose builds the image, installs the Python dependencies, and starts the Flask backend using python -m apps.main.
