@@ -275,6 +275,36 @@ button:disabled {
   transform: none;
 }
 
+.dashboard-card {
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(243, 232, 255, 0.72);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+}
+
+.dashboard-card h3 {
+  margin: 0 0 0.45rem;
+  color: #241a35;
+}
+
+.dashboard-card p {
+  margin: 0;
+  color: #6b5c7f;
+}
+
+.access-note {
+  margin: -0.35rem 0 0.25rem;
+  color: #6b5c7f;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
 .message {
   margin-bottom: 1.15rem;
   padding: 0.9rem 1rem;

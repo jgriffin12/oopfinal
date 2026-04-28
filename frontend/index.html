@@ -181,11 +181,27 @@
       </section>
 
       <section id="protected-panel" class="form-panel hidden">
-        <h2>Protected Record Access</h2>
-        <p>
-          MFA is complete. Providers can retrieve masked and tokenized patient
-          records.
-        </p>
+        <h2 id="dashboard-title">Protected Record Access</h2>
+<p id="dashboard-description">
+  MFA is complete. Providers can retrieve masked and tokenized patient
+  records.
+</p>
+
+<section id="patient-dashboard" class="dashboard-card hidden">
+  <h3>Patient Dashboard</h3>
+  <p>
+    Your identity has been verified. Patients can view their session status,
+    but protected record retrieval is restricted to providers.
+  </p>
+</section>
+
+<section id="provider-dashboard" class="dashboard-card hidden">
+  <h3>Provider Dashboard</h3>
+  <p>
+    Provider access is verified. You can retrieve assigned masked and tokenized
+    patient records.
+  </p>
+</section>
 
         <label>
           Username

@@ -17,6 +17,11 @@ const authStatusEl = document.getElementById("auth-status");
 const roleStatusEl = document.getElementById("role-status");
 const userStatusEl = document.getElementById("user-status");
 
+const dashboardTitle = document.getElementById("dashboard-title");
+const dashboardDescription = document.getElementById("dashboard-description");
+const patientDashboard = document.getElementById("patient-dashboard");
+const providerDashboard = document.getElementById("provider-dashboard");
+
 const recordUsernameInput = document.getElementById("record-username");
 const recordIdInput = document.getElementById("record-id");
 const recordButton = document.getElementById("record-btn");

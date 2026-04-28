@@ -324,3 +324,17 @@ def test_user_repository_all_users(tmp_path, monkeypatch):
     assert len(users) >= 2
     assert users[0].username == "alice"
     assert users[0].user_id == 1
+
+
+def test_user_repository_read_users_returns_empty_for_invalid_json_shape(
+    tmp_path,
+):
+    """_read_users should return an empty list if JSON is not a list."""
+    from apps.repositories.userRepo import UserRepository
+
+    users_file = tmp_path / "users.json"
+    users_file.write_text('{"bad": "shape"}', encoding="utf-8")
+
+    repository = UserRepository(file_path=str(users_file))
+
+    assert repository._read_users() == []
