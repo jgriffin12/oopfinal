@@ -7,3 +7,4 @@ mypy
 sendgrid
 flake8
 pytest-cov
+pdoc

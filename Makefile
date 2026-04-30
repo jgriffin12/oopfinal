@@ -1,5 +1,5 @@
 .RECIPEPREFIX := >
-.PHONY: install run test typecheck docker-build docker-up docker-down docker-test docker-shell
+.PHONY: install run test typecheck docs docker-build docker-up docker-down docker-test docker-docs docker-shell clean
 
 install:
 > pip install -r requirements.txt
@@ -13,6 +13,9 @@ test:
 typecheck:
 > mypy apps
 
+docs:
+> pdoc apps -o Docs/pdoc
+
 docker-build:
 > docker compose build
 
@@ -25,5 +28,12 @@ docker-down:
 docker-test:
 > docker compose run --rm backend pytest
 
+docker-docs:
+> docker compose run --rm backend pdoc apps -o Docs/pdoc
+
 docker-shell:
 > docker compose run --rm backend bash
+
+clean:
+> rm -rf Docs/pdoc .pytest_cache .mypy_cache .coverage htmlcov
+> find . -type d -name "__pycache__" -exec rm -rf {} +
