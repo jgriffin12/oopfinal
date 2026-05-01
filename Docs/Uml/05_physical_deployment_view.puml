@@ -1,23 +1,50 @@
-@startuml Physical Deployment
+@startuml
+title CJ Secure - Physical Deployment View
 
-node "User Browser" {
-  artifact "CJ Secure Frontend"
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 18
+skinparam titleFontSize 26
+skinparam nodeFontSize 20
+skinparam artifactFontSize 17
+skinparam ArrowFontSize 16
+skinparam linetype ortho
+
+top to bottom direction
+
+node "User Browser" as Browser {
+  artifact "CJ Secure UI" as UI
 }
 
-node "GitHub Pages" {
-  artifact "Static HTML/CSS/JS"
+node "Frontend Files" as Frontend {
+  artifact "frontend/index.html" as HTML
+  artifact "frontend/style.css" as CSS
+  artifact "frontend/script.js" as JS
 }
 
-node "Render or Local Docker" {
-  artifact "Flask Backend API"
+node "Docker Backend" as Backend {
+  artifact "Flask Backend API" as API
+  artifact "apps/main.py" as Main
+  artifact "Routes" as Routes
+  artifact "Controllers" as Controllers
+  artifact "Services" as Services
 }
 
-database "Data Files / Repository Layer" {
-  artifact "users / records / audit logs"
+database "Data Folder" as Data {
+  artifact "data/users.json" as Users
+  artifact "data/audit_log.txt" as Logs
 }
 
-"User Browser" --> "GitHub Pages" : loads frontend
-"User Browser" --> "Render or Local Docker" : API requests
-"Render or Local Docker" --> "Data Files / Repository Layer" : read/write data
+Browser --> Frontend : loads frontend
+Browser --> Backend : sends API requests
+Backend --> Data : reads users
+Backend --> Data : writes audit logs
 
+note right of Logs
+Audit log stores
+action-based events:
+login, MFA, records,
+admin review, sign out.
+end note
 @enduml

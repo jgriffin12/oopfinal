@@ -1,39 +1,73 @@
 @startuml
+title Process / Sequence View - Login, MFA, and Role-Based Access
 
 actor User
 participant "Frontend" as FE
-participant "Auth Route" as Route
-participant "AuthService" as Auth
-participant "UserRepository" as Repo
-participant "MFAService" as MFA
-participant "MFAFactory" as Factory
-participant "MFAStrategy" as Strategy
-participant "AuditLogger" as Audit
+participant "authRoutes" as AR
+participant "LoginController" as LC
+participant "AuthService" as AS
+participant "UserRepository" as UR
+participant "PasswordHasher" as PH
+participant "MFAService" as MS
+participant "MFAFactory" as MF
+participant "MFAStrategy" as STRAT
+participant "AuditLogger" as AL
 
-User -> FE : enter username/password
-FE -> Route : POST /login
-Route -> Auth : login(username, password)
-Auth -> Repo : find user
-Repo --> Auth : user
+User -> FE : Enter email
+FE -> AR : POST /check-email
+AR -> LC : check_email_request(data)
+LC -> AS : check_email(email)
+AS -> UR : find_by_email(email)
+UR --> AS : user / none
+AS --> LC : existing_user / new_user
+LC --> AR : result
+AR --> FE : response
 
-Auth -> MFA : send MFA code
-MFA -> Factory : create strategy
-Factory --> MFA : strategy
-MFA -> Strategy : send code
+User -> FE : Enter username, role, password
+FE -> AR : POST /login
+AR -> LC : login_request(data)
+LC -> AS : authenticate(username, password, role)
+AS -> UR : find_by_username(username)
+UR --> AS : user
+AS -> PH : verify_password(password, hash)
+PH --> AS : true / false
 
-Auth -> Audit : log login attempt
-Auth --> Route : MFA required
-Route --> FE : response
+alt valid credentials
+  AS -> MS : send_mfa_code(user, method)
+  MS -> MF : create_strategy(method)
+  MF --> MS : strategy
+  MS -> STRAT : send_code(user)
+  STRAT --> MS : code sent
+  AS -> AL : log_event("login_mfa_sent", username, "success")
+  AS --> LC : pending
+else invalid credentials
+  AS -> AL : log_event("login_bad_password", username, "failure")
+  AS --> LC : error
+end
 
-User -> FE : enter MFA code
-FE -> Route : POST /verify-mfa
-Route -> Auth : verify code
-Auth -> MFA : verify MFA
-MFA -> Strategy : verify code
-Strategy --> MFA : valid/invalid
-MFA --> Auth : result
-Auth -> Audit : log MFA result
-Auth --> Route : access granted
-Route --> FE : login complete
+LC --> AR : result
+AR --> FE : response
 
+User -> FE : Enter MFA code
+FE -> AR : POST /verify-mfa
+AR -> LC : verify_mfa_request(data)
+LC -> AS : verify_mfa(username, code)
+AS -> UR : find_by_username(username)
+UR --> AS : user
+AS -> MS : verify_mfa_code(user, code, method)
+MS -> MF : create_strategy(method)
+MF --> MS : strategy
+MS -> STRAT : verify_code(user, code)
+STRAT --> MS : valid / invalid
+
+alt MFA success
+  AS -> AL : log_event("mfa_success", username, "success")
+  AS --> LC : success with role
+else MFA failure
+  AS -> AL : log_event("mfa_failed", username, "failure")
+  AS --> LC : error
+end
+
+LC --> AR : result
+AR --> FE : authenticated response
 @enduml

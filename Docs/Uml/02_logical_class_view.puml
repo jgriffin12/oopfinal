@@ -1,49 +1,70 @@
 @startuml
+skinparam classAttributeIconSize 0
+title Logical / Class View - CJ Secure
 
-class AuthController
-class RecordController
-class AdminController
+package "controllers" {
+  class LoginController
+  class RecordController
+  class AdminController
+}
 
-class AuthService
-class MFAService
-class RecordService
-class AccessControlService
-class AuditLogger
+package "services" {
+  class AuthService
+  class RecordService
+  class MFAService
+  class AccessControlService
+  class AuditLogger
+}
 
-class UserRepository
-class RecordRepository
-class AuditRepository
+package "repositories" {
+  class UserRepository
+  class RecordRepository
+  class AuditRepository
+}
 
-class MFAFactory
-interface MFAStrategy
-class EmailOTPStrategy
-class TOTPStrategy
+package "models" {
+  class User
+  class Record
+  class SecurityEvent
+}
 
-class User
-class MedicalRecord
-class SecurityEvent
+package "security" {
+  abstract class MFAStrategy
+  class EmailOTPStrategy
+  class TOTPStrategy
+  class MFAFactory
+  class PasswordHasher
+  class SensitiveDataMasker
+  class Tokenizer
+}
 
-AuthController --> AuthService
+LoginController --> AuthService
 RecordController --> RecordService
+RecordController --> UserRepository
+RecordController --> AccessControlService
+RecordController --> AuditLogger
+AdminController --> UserRepository
+AdminController --> AccessControlService
 AdminController --> AuditLogger
 
 AuthService --> UserRepository
+AuthService --> PasswordHasher
 AuthService --> MFAService
 AuthService --> AuditLogger
 
 MFAService --> MFAFactory
 MFAFactory --> MFAStrategy
-MFAStrategy <|.. EmailOTPStrategy
-MFAStrategy <|.. TOTPStrategy
+MFAStrategy <|-- EmailOTPStrategy
+MFAStrategy <|-- TOTPStrategy
 
 RecordService --> RecordRepository
 RecordService --> AccessControlService
 RecordService --> AuditLogger
+RecordService --> SensitiveDataMasker
+RecordService --> Tokenizer
 
 AuditLogger --> AuditRepository
-
-UserRepository --> User
-RecordRepository --> MedicalRecord
 AuditRepository --> SecurityEvent
-
+UserRepository --> User
+RecordRepository --> Record
 @enduml

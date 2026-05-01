@@ -1,32 +1,42 @@
 @startuml
 left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
 
-actor Patient
+title Context / Use Case View - CJ Secure
+
 actor Provider
+actor Patient
 actor Admin
 
 rectangle "CJ Secure Portal" {
-  usecase "Login" as UC1
-  usecase "Verify MFA" as UC2
-  usecase "View Protected Record" as UC3
-  usecase "View Masked Patient Data" as UC4
-  usecase "Review Audit Logs" as UC5
+  usecase "Check Email" as UC1
+  usecase "Register Account" as UC2
+  usecase "Login" as UC3
+  usecase "Verify MFA" as UC4
+  usecase "Retrieve Protected Record" as UC5
+  usecase "View Patient Dashboard\n(No appointments message)" as UC6
+  usecase "Review Audit Logs" as UC7
 }
+
+Provider --> UC1
+Provider --> UC3
+Provider --> UC4
+Provider --> UC5
 
 Patient --> UC1
 Patient --> UC2
 Patient --> UC3
-
-Provider --> UC1
-Provider --> UC2
-Provider --> UC3
-Provider --> UC4
+Patient --> UC4
+Patient --> UC6
 
 Admin --> UC1
-Admin --> UC2
-Admin --> UC5
+Admin --> UC3
+Admin --> UC4
+Admin --> UC7
 
-UC1 --> UC2 : requires
-UC3 --> UC4 : protects data
-
+UC3 .> UC4 : requires
+UC5 .> UC4 : after authentication
+UC6 .> UC4 : after authentication
+UC7 .> UC4 : after authentication
 @enduml

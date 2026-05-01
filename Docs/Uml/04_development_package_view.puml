@@ -1,4 +1,6 @@
-@startuml Development
+@startuml
+title Development / Package View - CJ Secure
+skinparam packageStyle rectangle
 
 package "frontend" {
   [index.html]
@@ -7,63 +9,77 @@ package "frontend" {
 }
 
 package "apps.routes" {
-  [authRoutes]
-  [recordRoutes]
-  [adminRoutes]
+  [authRoutes.py]
+  [recordroutes.py]
+  [adminroutes.py]
 }
 
 package "apps.controllers" {
-  [AuthController]
-  [RecordController]
+  [loginController.py]
+  [recordController.py]
+  [adminController.py]
 }
 
 package "apps.services" {
-  [AuthService]
-  [MFAService]
-  [RecordService]
-  [AccessControlService]
+  [authSvc.py]
+  [recordSvc.py]
+  [mfaSvc.py]
+  [accessControlSvc.py]
+  [auditLogger.py]
 }
 
 package "apps.repositories" {
-  [UserRepository]
-  [RecordRepository]
-  [AuditRepository]
-}
-
-package "apps.security" {
-  [PasswordHasher]
-  [MFAFactory]
-  [MFAStrategy]
-  [SensitiveDataMasker]
-  [Tokenizer]
+  [userRepo.py]
+  [recordRepo.py]
+  [auditRepo.py]
 }
 
 package "apps.models" {
-  [User]
-  [MedicalRecord]
-  [SecurityEvent]
+  [user.py]
+  [record.py]
+  [secEvent.py]
+  [permission.py]
 }
 
-[script.js] --> [authRoutes]
-[script.js] --> [recordRoutes]
+package "apps.security" {
+  [passHash.py]
+  [mfaFactory.py]
+  [mfaStrategies.py]
+  [masker.py]
+  [tokenizer.py]
+}
 
-[authRoutes] --> [AuthController]
-[recordRoutes] --> [RecordController]
+[index.html] --> [script.js]
+[script.js] --> [authRoutes.py]
+[script.js] --> [recordroutes.py]
+[script.js] --> [adminroutes.py]
 
-[AuthController] --> [AuthService]
-[RecordController] --> [RecordService]
+[authRoutes.py] --> [loginController.py]
+[recordroutes.py] --> [recordController.py]
+[adminroutes.py] --> [adminController.py]
 
-[AuthService] --> [UserRepository]
-[AuthService] --> [MFAService]
-[RecordService] --> [RecordRepository]
+[loginController.py] --> [authSvc.py]
+[recordController.py] --> [recordSvc.py]
+[adminController.py] --> [auditLogger.py]
+[adminController.py] --> [accessControlSvc.py]
+[adminController.py] --> [userRepo.py]
 
-[AuthService] --> [PasswordHasher]
-[MFAService] --> [MFAFactory]
-[RecordService] --> [SensitiveDataMasker]
-[RecordService] --> [Tokenizer]
+[authSvc.py] --> [userRepo.py]
+[authSvc.py] --> [passHash.py]
+[authSvc.py] --> [mfaSvc.py]
+[authSvc.py] --> [auditLogger.py]
 
-[UserRepository] --> [User]
-[RecordRepository] --> [MedicalRecord]
-[AuditRepository] --> [SecurityEvent]
+[recordSvc.py] --> [recordRepo.py]
+[recordSvc.py] --> [accessControlSvc.py]
+[recordSvc.py] --> [masker.py]
+[recordSvc.py] --> [tokenizer.py]
+[recordSvc.py] --> [auditLogger.py]
 
+[mfaSvc.py] --> [mfaFactory.py]
+[mfaFactory.py] --> [mfaStrategies.py]
+
+[auditLogger.py] --> [auditRepo.py]
+[userRepo.py] --> [user.py]
+[recordRepo.py] --> [record.py]
+[auditRepo.py] --> [secEvent.py]
 @enduml
